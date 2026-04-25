@@ -1,0 +1,22 @@
+﻿using System.Numerics;
+
+namespace backend.Model
+{
+    public class Part
+    {
+        public int PartId { get; set; }
+
+        public string PartName { get; set; }
+        public string Description { get; set; }
+
+        public decimal Price { get; set; }
+        public int StockQuantity { get; set; }
+        public int ReorderLevel { get; set; }
+
+        public int? VendorId { get; set; }
+        public Vendor Vendor { get; set; }
+
+        public List<SalesItem> SalesItems { get; set; }
+        public List<PurchaseItem> PurchaseItems { get; set; }
+    }
+}

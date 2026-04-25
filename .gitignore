@@ -1,0 +1,13 @@
+# Visual Studio
+.vs/
+
+# Build folders
+bin/
+obj/
+
+# User files
+*.user
+
+# OS files
+.DS_Store
+Thumbs.db
