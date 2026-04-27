@@ -1,4 +1,4 @@
-﻿using backend.Dto;
+using backend.Dto;
 using backend.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +20,15 @@ namespace backend.Controllers
         public IActionResult Register(RegisterUserDto dto)
         {
             _service.Register(dto);
-            return Ok("User registered");
+            return Ok(new { message = "User registered successfully" });
+        }
+
+        [HttpPost("login")]
+        public IActionResult Login(LoginDto dto)
+        {
+            var user = _service.Login(dto.Email, dto.Password);
+            if (user == null) return Unauthorized(new { message = "Invalid email or password" });
+            return Ok(user);
         }
 
         [HttpGet("{id}")]
@@ -35,7 +43,8 @@ namespace backend.Controllers
         public IActionResult UpdateProfile(int id, RegisterUserDto dto)
         {
             _service.UpdateProfile(id, dto);
-            return Ok("Profile updated");
+            return Ok(new { message = "Profile updated successfully" });
         }
     }
 }
+

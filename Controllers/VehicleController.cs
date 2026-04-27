@@ -1,4 +1,4 @@
-﻿using backend.Dto;
+using backend.Dto;
 using backend.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,8 +18,15 @@ namespace backend.Controllers
         [HttpPost("{userId}")]
         public IActionResult AddVehicle(int userId, CreateVehicleDto dto)
         {
-            _service.AddVehicle(userId, dto);
-            return Ok("Vehicle added");
+            try
+            {
+                _service.AddVehicle(userId, dto);
+                return Ok(new { message = "Vehicle added successfully" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Failed to add vehicle: " + ex.Message });
+            }
         }
 
         [HttpGet("user/{userId}")]
@@ -31,15 +38,30 @@ namespace backend.Controllers
         [HttpPut("{id}")]
         public IActionResult UpdateVehicle(int id, CreateVehicleDto dto)
         {
-            _service.UpdateVehicle(id, dto);
-            return Ok("Vehicle updated");
+            try
+            {
+                _service.UpdateVehicle(id, dto);
+                return Ok(new { message = "Vehicle updated successfully" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Failed to update vehicle: " + ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]
         public IActionResult DeleteVehicle(int id)
         {
-            _service.DeleteVehicle(id);
-            return Ok("Vehicle deleted");
+            try
+            {
+                _service.DeleteVehicle(id);
+                return Ok(new { message = "Vehicle deleted successfully" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Failed to delete vehicle: " + ex.Message });
+            }
         }
     }
 }
+

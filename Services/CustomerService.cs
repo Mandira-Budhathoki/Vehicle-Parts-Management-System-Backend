@@ -1,9 +1,10 @@
-﻿namespace backend.Services
+namespace backend.Services
 {
     using backend.Data;
     using backend.Dto;
     using backend.Interfaces;
     using backend.Model;
+    using Microsoft.EntityFrameworkCore;
 
     public class CustomerService : ICustomerService
     {
@@ -28,6 +29,22 @@
 
             _context.Users.Add(user);
             _context.SaveChanges();
+        }
+
+        public UserDto? Login(string email, string password)
+        {
+            var user = _context.Users
+                .FirstOrDefault(u => u.Email == email && u.Password == password);
+
+            if (user == null) return null;
+
+            return new UserDto
+            {
+                UserId = user.UserId,
+                Name = user.Name,
+                Email = user.Email,
+                Phone = user.Phone
+            };
         }
 
         public UserDto GetProfile(int id)
@@ -57,3 +74,4 @@
         }
     }
 }
+
