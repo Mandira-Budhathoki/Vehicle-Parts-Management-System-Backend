@@ -33,7 +33,14 @@ namespace backend.Controllers
             }
 
             var token = GenerateJwtToken(user);
-            return Ok(new { Token = token, Role = user.Role, Name = user.Name });
+            return Ok(new
+            {
+                userId = user.UserId,
+                name = user.Name,
+                email = user.Email,
+                role = user.Role,
+                token = token
+            });
         }
 
         private string GenerateJwtToken(User user)
