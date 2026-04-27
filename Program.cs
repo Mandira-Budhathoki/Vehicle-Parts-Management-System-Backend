@@ -13,6 +13,9 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddScoped<backend.Services.IStaffService, backend.Services.StaffService>();
+builder.Services.AddScoped<backend.Services.IAuthService, backend.Services.AuthService>();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",
