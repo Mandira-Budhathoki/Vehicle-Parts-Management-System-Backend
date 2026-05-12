@@ -22,6 +22,7 @@ namespace backend.Services
                 {
                     PartId = p.PartId,
                     PartName = p.PartName,
+                    Category = p.Category,
                     Description = p.Description,
                     Price = p.Price,
                     StockQuantity = p.StockQuantity,
@@ -40,6 +41,7 @@ namespace backend.Services
             {
                 PartId = p.PartId,
                 PartName = p.PartName,
+                Category = p.Category,
                 Description = p.Description,
                 Price = p.Price,
                 StockQuantity = p.StockQuantity,
@@ -53,6 +55,7 @@ namespace backend.Services
             var part = new Part
             {
                 PartName = dto.PartName,
+                Category = dto.Category,
                 Description = dto.Description,
                 Price = dto.Price,
                 StockQuantity = dto.StockQuantity,
@@ -73,6 +76,7 @@ namespace backend.Services
             if (part == null) throw new Exception("Part not found");
 
             part.PartName = dto.PartName;
+            part.Category = dto.Category;
             part.Description = dto.Description;
             part.Price = dto.Price;
             part.StockQuantity = dto.StockQuantity;
