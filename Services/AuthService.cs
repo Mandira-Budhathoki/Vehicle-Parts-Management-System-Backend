@@ -37,7 +37,8 @@ namespace backend.Services
             {
                 Token = token,
                 Role = user.Role,
-                Name = user.Name
+                Name = user.Name,
+                UserId = user.UserId
             };
         }
 
