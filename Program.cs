@@ -28,6 +28,7 @@ builder.Services.AddScoped<IVehicleService, VehicleService>();
 builder.Services.AddScoped<IStaffService, StaffService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IVendorService, VendorService>();
+builder.Services.AddScoped<IReportsService, ReportsService>();
 
 // ================= CORS =================
 builder.Services.AddCors(options =>
