@@ -16,11 +16,13 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Services
+// ================= SERVICES =================
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
+builder.Services.AddScoped<IStaffService, StaffService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
-// CORS
+// ================= CORS =================
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -31,7 +33,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-// JWT Authentication
+// ================= JWT AUTH =================
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
 
@@ -54,7 +56,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// Swagger
+// ================= SWAGGER =================
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -91,7 +93,7 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Middleware
+// ================= MIDDLEWARE =================
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
