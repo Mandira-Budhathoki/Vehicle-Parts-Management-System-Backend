@@ -4,7 +4,7 @@ namespace backend.Interfaces
 {
     public interface ICustomerService
     {
-        void Register(RegisterUserDto dto);
+        int Register(RegisterUserDto dto);
         UserDto? Login(string email, string password);
         UserDto GetProfile(int id);
         void UpdateProfile(int id, RegisterUserDto dto);

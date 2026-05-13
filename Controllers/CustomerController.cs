@@ -19,8 +19,8 @@ namespace backend.Controllers
         [HttpPost("register")]
         public IActionResult Register(RegisterUserDto dto)
         {
-            _service.Register(dto);
-            return Ok(new { message = "User registered successfully" });
+            int userId = _service.Register(dto);
+            return Ok(new { message = "User registered successfully", userId = userId });
         }
 
         [HttpPost("login")]

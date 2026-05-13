@@ -15,7 +15,7 @@ namespace backend.Services
             _context = context;
         }
 
-        public void Register(RegisterUserDto dto)
+        public int Register(RegisterUserDto dto)
         {
             var user = new User
             {
@@ -29,6 +29,8 @@ namespace backend.Services
 
             _context.Users.Add(user);
             _context.SaveChanges();
+            
+            return user.UserId;
         }
 
         public UserDto? Login(string email, string password)
