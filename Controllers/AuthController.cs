@@ -27,7 +27,12 @@ namespace backend.Controllers
                     return Unauthorized("Invalid email or password.");
                 }
 
-                return Ok(response);
+                return Ok(new {
+                    Token = response.Token,
+                    Role = response.Role,
+                    Name = response.Name,
+                    UserId = response.UserId
+                });
             }
             catch (Exception ex)
             {

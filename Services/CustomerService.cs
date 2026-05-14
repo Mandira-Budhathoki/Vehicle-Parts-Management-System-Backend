@@ -74,6 +74,39 @@ namespace backend.Services
 
             _context.SaveChanges();
         }
+
+        public async Task<IEnumerable<CustomerResponseDto>> GetAllCustomersAsync()
+        {
+            return await _context.Users
+                .Where(u => u.Role == "CUSTOMER")
+                .Include(u => u.Vehicles)
+                .Select(u => new CustomerResponseDto
+                {
+                    UserId = u.UserId,
+                    Name = u.Name,
+                    Email = u.Email,
+                    Phone = u.Phone,
+                    Vehicles = u.Vehicles.Select(v => new VehicleDto
+                    {
+                        VehicleId = v.VehicleId,
+                        VehicleNumber = v.VehicleNumber,
+                        Brand = v.Brand,
+                        Model = v.Model,
+                        Year = v.Year
+                    }).ToList()
+                })
+                .ToListAsync();
+        }
+
+        public void DeleteCustomer(int id)
+        {
+            var user = _context.Users.Find(id);
+            if (user != null)
+            {
+                _context.Users.Remove(user);
+                _context.SaveChanges();
+            }
+        }
     }
 }
 

@@ -8,5 +8,7 @@ namespace backend.Interfaces
         UserDto? Login(string email, string password);
         UserDto GetProfile(int id);
         void UpdateProfile(int id, RegisterUserDto dto);
+        Task<IEnumerable<CustomerResponseDto>> GetAllCustomersAsync();
+        void DeleteCustomer(int id);
     }
 }
