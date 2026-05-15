@@ -1,7 +1,9 @@
-﻿namespace backend.Model
+﻿using System.ComponentModel.DataAnnotations;
+namespace backend.Model
 {
     public class PartRequest
     {
+        [Key]
         public int RequestId { get; set; }
         public int UserId { get; set; }
 

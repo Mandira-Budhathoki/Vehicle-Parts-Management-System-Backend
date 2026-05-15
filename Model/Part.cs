@@ -1,9 +1,11 @@
-﻿using System.Numerics;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Numerics;
 
 namespace backend.Model
 {
     public class Part
     {
+        [Key]
         public int PartId { get; set; }
 
         public string PartName { get; set; }

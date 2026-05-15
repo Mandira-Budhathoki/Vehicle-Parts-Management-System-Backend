@@ -1,7 +1,10 @@
-﻿namespace backend.Model
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace backend.Model
 {
     public class Appointment
     {
+        [Key]
         public int AppointmentId { get; set; }
         public int VehicleId { get; set; }
 
