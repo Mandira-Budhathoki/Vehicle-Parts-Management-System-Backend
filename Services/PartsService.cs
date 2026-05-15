@@ -18,6 +18,7 @@ namespace backend.Services
         public async Task<IEnumerable<PartDto>> GetAllPartsAsync()
         {
             return await _context.Parts
+                .OrderBy(p => p.PartId)
                 .Select(p => new PartDto
                 {
                     PartId = p.PartId,
