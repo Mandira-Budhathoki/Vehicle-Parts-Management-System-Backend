@@ -1,7 +1,10 @@
-﻿namespace backend.Model
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace backend.Model
 {
     public class Review
     {
+        [Key]
         public int ReviewId { get; set; }
         public int VehicleId { get; set; }
         public int UserId { get; set; }
