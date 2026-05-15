@@ -16,11 +16,18 @@ namespace backend.Controllers
             _service = service;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAllCustomers()
+        {
+            var customers = await _service.GetAllCustomersAsync();
+            return Ok(customers);
+        }
+
         [HttpPost("register")]
         public IActionResult Register(RegisterUserDto dto)
         {
-            _service.Register(dto);
-            return Ok(new { message = "User registered successfully" });
+            int userId = _service.Register(dto);
+            return Ok(new { message = "User registered successfully", userId = userId });
         }
 
         [HttpPost("login")]
@@ -44,6 +51,13 @@ namespace backend.Controllers
         {
             _service.UpdateProfile(id, dto);
             return Ok(new { message = "Profile updated successfully" });
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteCustomer(int id)
+        {
+            _service.DeleteCustomer(id);
+            return Ok(new { message = "Customer deleted successfully" });
         }
     }
 }
