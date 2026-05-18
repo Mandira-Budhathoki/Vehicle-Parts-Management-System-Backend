@@ -39,6 +39,13 @@ namespace backend.Controllers
             return Ok(user);
         }
 
+        [HttpGet]
+        public IActionResult GetAllCustomers()
+        {
+            var users = _service.GetAllCustomers();
+            return Ok(users);
+        }
+
         [HttpPut("{id}")]
         public IActionResult UpdateProfile(int id, RegisterUserDto dto)
         {

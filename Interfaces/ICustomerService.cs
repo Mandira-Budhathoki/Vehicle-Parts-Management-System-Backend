@@ -7,6 +7,7 @@ namespace backend.Interfaces
         void Register(RegisterUserDto dto);
         UserDto? Login(string email, string password);
         UserDto GetProfile(int id);
+        IEnumerable<UserDto> GetAllCustomers();
         void UpdateProfile(int id, RegisterUserDto dto);
     }
 }

@@ -61,6 +61,19 @@ namespace backend.Services
             };
         }
 
+        public IEnumerable<UserDto> GetAllCustomers()
+        {
+            return _context.Users
+                .Where(u => u.Role.ToUpper() == "CUSTOMER")
+                .Select(u => new UserDto
+                {
+                    UserId = u.UserId,
+                    Name = u.Name,
+                    Email = u.Email,
+                    Phone = u.Phone
+                }).ToList();
+        }
+
         public void UpdateProfile(int id, RegisterUserDto dto)
         {
             var user = _context.Users.Find(id);
