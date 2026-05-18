@@ -46,6 +46,14 @@ namespace backend.Controllers
             return Ok(user);
         }
 
+        [HttpGet("{id}/full-profile")]
+        public async Task<IActionResult> GetFullProfile(int id)
+        {
+            var profile = await _service.GetFullCustomerProfileAsync(id);
+            if (profile == null) return NotFound(new { message = "Customer not found." });
+            return Ok(profile);
+        }
+
         [HttpPut("{id}")]
         public IActionResult UpdateProfile(int id, RegisterUserDto dto)
         {
