@@ -12,6 +12,8 @@
         public decimal Discount { get; set; }
         public decimal FinalAmount { get; set; }
 
+        public bool IsLoyaltyApplied { get; set; }
+
         public string PaymentStatus { get; set; }
 
         public User User { get; set; }
