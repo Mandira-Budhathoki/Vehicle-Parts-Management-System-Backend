@@ -22,7 +22,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // ================= SERVICES =================
-// (merged both branches safely)
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
 builder.Services.AddScoped<IStaffService, StaffService>();
@@ -38,7 +37,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "http://localhost:5174")
+        policy.WithOrigins(
+                "http://localhost:5173",
+                "http://localhost:5174"
+              )
               .AllowAnyHeader()
               .AllowAnyMethod();
     });

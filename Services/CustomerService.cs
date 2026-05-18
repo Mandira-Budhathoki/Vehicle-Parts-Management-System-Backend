@@ -45,7 +45,8 @@ namespace backend.Services
                 UserId = user.UserId,
                 Name = user.Name,
                 Email = user.Email,
-                Phone = user.Phone
+                Phone = user.Phone,
+                TotalSpent = _context.Sales.Where(s => s.UserId == user.UserId).Sum(s => (decimal?)s.FinalAmount) ?? 0
             };
         }
 
@@ -59,8 +60,23 @@ namespace backend.Services
                 UserId = user.UserId,
                 Name = user.Name,
                 Email = user.Email,
-                Phone = user.Phone
+                Phone = user.Phone,
+                TotalSpent = _context.Sales.Where(s => s.UserId == user.UserId).Sum(s => (decimal?)s.FinalAmount) ?? 0
             };
+        }
+
+        public IEnumerable<UserDto> GetAllCustomers()
+        {
+            return _context.Users
+                .Where(u => u.Role.ToUpper() == "CUSTOMER")
+                .Select(u => new UserDto
+                {
+                    UserId = u.UserId,
+                    Name = u.Name,
+                    Email = u.Email,
+                    Phone = u.Phone,
+                    TotalSpent = _context.Sales.Where(s => s.UserId == u.UserId).Sum(s => (decimal?)s.FinalAmount) ?? 0
+                }).ToList();
         }
 
         public void UpdateProfile(int id, RegisterUserDto dto)
@@ -86,6 +102,7 @@ namespace backend.Services
                     Name = u.Name,
                     Email = u.Email,
                     Phone = u.Phone,
+                    TotalSpent = _context.Sales.Where(s => s.UserId == u.UserId).Sum(s => (decimal?)s.FinalAmount) ?? 0,
                     Vehicles = u.Vehicles.Select(v => new VehicleDto
                     {
                         VehicleId = v.VehicleId,

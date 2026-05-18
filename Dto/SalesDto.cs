@@ -1,20 +1,20 @@
-﻿namespace backend.Model
+﻿namespace backend.Dto
 {
-    public class Sales
+    public class SalesDto
     {
         public int SalesId { get; set; }
         public int UserId { get; set; }
+        public string CustomerName { get; set; }
         public int StaffId { get; set; }
-
         public DateTime Date { get; set; }
 
         public decimal TotalAmount { get; set; }
         public decimal Discount { get; set; }
         public decimal FinalAmount { get; set; }
-
         public string PaymentStatus { get; set; }
 
-        public User User { get; set; }
-        public List<SalesItem> SalesItems { get; set; }
+        public bool IsLoyalCustomer { get; set; }
+
+        public List<SalesItemDto> SalesItems { get; set; }
     }
 }

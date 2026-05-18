@@ -1,61 +1,167 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using backend.Data;
 using backend.Dto;
 using backend.Interfaces;
 using backend.Model;
-using backend.Data;
+using Microsoft.EntityFrameworkCore;
 
-public class SalesService : ISalesService
+namespace backend.Services
 {
-    private readonly AppDbContext _context;
-
-    public SalesService(AppDbContext context)
+    public class SalesService : ISalesService
     {
-        _context = context;
-    }
+        private readonly AppDbContext _context;
+        private const decimal LOYALTY_THRESHOLD = 5000m;
 
-    public async Task<Sales> CreateSaleAsync(CreateSalesDto dto)
-    {
-        var sale = new Sales
+        public SalesService(AppDbContext context)
         {
-            UserId = dto.UserId,
-            StaffId = dto.StaffId,
-            Date = DateTime.Now,
-            TotalAmount = 0,
-            Discount = 0,
-            FinalAmount = 0,
-            PaymentStatus = "Paid",
-            SalesItems = new List<SalesItem>()
-        };
+            _context = context;
+        }
 
-        foreach (var item in dto.Items)
+        public async Task<SalesDto> CreateSalesInvoiceAsync(CreateSalesDto dto)
         {
-            var part = await _context.Parts.FindAsync(item.PartId);
+            using var transaction = await _context.Database.BeginTransactionAsync();
 
-            if (part == null)
-                throw new Exception("Part not found");
-
-            var saleItem = new SalesItem
+            try
             {
-                PartId = item.PartId,
-                Quantity = item.Quantity,
-                Price = part.Price,
-                Subtotal = part.Price * item.Quantity
-            };
+                var salesItems = new List<SalesItem>();
+                decimal totalAmount = 0;
 
-            sale.TotalAmount += saleItem.Subtotal;
-            sale.SalesItems.Add(saleItem);
+                foreach (var itemDto in dto.SalesItems)
+                {
+                    var part = await _context.Parts.FindAsync(itemDto.PartId);
+
+                    if (part == null)
+                        throw new Exception($"Part {itemDto.PartId} not found.");
+
+                    if (part.StockQuantity < itemDto.Quantity)
+                        throw new Exception($"Insufficient stock for {part.PartName}");
+
+                    part.StockQuantity -= itemDto.Quantity;
+
+                    var subtotal = part.Price * itemDto.Quantity;
+                    totalAmount += subtotal;
+
+                    salesItems.Add(new SalesItem
+                    {
+                        PartId = itemDto.PartId,
+                        Quantity = itemDto.Quantity,
+                        Price = part.Price,
+                        Subtotal = subtotal
+                    });
+                }
+
+                // ================= LOYALTY LOGIC =================
+                var customerTotalSpent = await _context.Sales
+                    .Where(s => s.UserId == dto.UserId)
+                    .SumAsync(s => (decimal?)s.FinalAmount) ?? 0;
+
+                bool isLoyalCustomer = (customerTotalSpent + totalAmount) >= LOYALTY_THRESHOLD;
+
+                decimal discount = isLoyalCustomer ? totalAmount * 0.10m : 0;
+                decimal finalAmount = totalAmount - discount;
+
+                // ================= CREATE SALES =================
+                var sales = new Sales
+                {
+                    UserId = dto.UserId,
+                    StaffId = dto.StaffId,
+                    Date = DateTime.UtcNow,
+                    TotalAmount = totalAmount,
+                    Discount = discount,
+                    FinalAmount = finalAmount,
+                    PaymentStatus = string.IsNullOrWhiteSpace(dto.PaymentStatus)
+                        ? "Completed"
+                        : dto.PaymentStatus,
+                    SalesItems = salesItems
+                };
+
+                _context.Sales.Add(sales);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return new SalesDto
+                {
+                    SalesId = sales.SalesId,
+                    UserId = sales.UserId,
+                    StaffId = sales.StaffId,
+                    Date = sales.Date,
+                    TotalAmount = sales.TotalAmount,
+                    Discount = sales.Discount,
+                    FinalAmount = sales.FinalAmount,
+                    PaymentStatus = sales.PaymentStatus,
+                    IsLoyalCustomer = isLoyalCustomer,
+
+                    SalesItems = sales.SalesItems.Select(si => new SalesItemDto
+                    {
+                        SalesItemId = si.SalesItemId,
+                        SalesId = si.SalesId,
+                        PartId = si.PartId,
+                        PartName = si.Part?.PartName,
+                        Quantity = si.Quantity,
+                        Price = si.Price,
+                        Subtotal = si.Subtotal
+                    }).ToList()
+                };
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
-        // FEATURE 16 LOGIC (LOYALTY)
-        if (sale.TotalAmount > 5000)
+        public async Task<IEnumerable<SalesDto>> GetAllSalesInvoicesAsync()
         {
-            sale.Discount = sale.TotalAmount * 0.10m;
+            var salesList = await _context.Sales
+                .Include(s => s.User)
+                .Include(s => s.SalesItems)
+                .ThenInclude(si => si.Part)
+                .OrderByDescending(s => s.Date)
+                .ToListAsync();
+
+            return salesList.Select(MapToDto);
         }
 
-        sale.FinalAmount = sale.TotalAmount - sale.Discount;
+        public async Task<SalesDto> GetSalesInvoiceByIdAsync(int id)
+        {
+            var sales = await _context.Sales
+                .Include(s => s.User)
+                .Include(s => s.SalesItems)
+                .ThenInclude(si => si.Part)
+                .FirstOrDefaultAsync(s => s.SalesId == id);
 
-        _context.Sales.Add(sale);
-        await _context.SaveChangesAsync();
+            return sales == null ? null : MapToDto(sales);
+        }
 
-        return sale;
+        private SalesDto MapToDto(Sales sales)
+        {
+            return new SalesDto
+            {
+                SalesId = sales.SalesId,
+                UserId = sales.UserId,
+                CustomerName = sales.User?.Name,
+                StaffId = sales.StaffId,
+                Date = sales.Date,
+                TotalAmount = sales.TotalAmount,
+                Discount = sales.Discount,
+                FinalAmount = sales.FinalAmount,
+                PaymentStatus = sales.PaymentStatus,
+                IsLoyalCustomer = sales.Discount > 0,
+
+                SalesItems = sales.SalesItems?.Select(si => new SalesItemDto
+                {
+                    SalesItemId = si.SalesItemId,
+                    SalesId = si.SalesId,
+                    PartId = si.PartId,
+                    PartName = si.Part?.PartName,
+                    Quantity = si.Quantity,
+                    Price = si.Price,
+                    Subtotal = si.Subtotal
+                }).ToList() ?? new List<SalesItemDto>()
+            };
+        }
     }
 }

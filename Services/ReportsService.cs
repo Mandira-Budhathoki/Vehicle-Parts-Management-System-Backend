@@ -47,7 +47,7 @@ namespace backend.Services
                     Phone = g.Key.Phone,
                     TotalSpent = g.Sum(s => s.FinalAmount),
                     TotalOrders = g.Count(),
-                    HasLoyaltyDiscount = g.Sum(s => s.FinalAmount) >= 5000
+                    HasLoyaltyDiscount = g.Sum(s => s.TotalAmount) >= 5000
                 })
                 .Where(c => c.TotalSpent > 2000)
                 .OrderByDescending(c => c.TotalSpent)
