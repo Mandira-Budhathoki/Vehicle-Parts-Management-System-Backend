@@ -2,6 +2,7 @@ using backend.Dto;
 using backend.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers
 {
@@ -23,11 +24,28 @@ namespace backend.Controllers
             return Ok(customers);
         }
 
+        [HttpGet("all-users-debug")]
+        public IActionResult GetUsersDebug()
+        {
+            var dbOptions = new DbContextOptionsBuilder<backend.Data.AppDbContext>()
+                .UseNpgsql("Host=localhost;Port=5433;Database=VehicleDB;Username=postgres;Password=messi");
+            using var context = new backend.Data.AppDbContext(dbOptions.Options);
+            var users = context.Users.Select(u => new { u.Email, u.Password, u.Role, u.Name }).ToList();
+            return Ok(users);
+        }
+
         [HttpPost("register")]
         public IActionResult Register(RegisterUserDto dto)
         {
-            int userId = _service.Register(dto);
-            return Ok(new { message = "User registered successfully", userId = userId });
+            try
+            {
+                int userId = _service.Register(dto);
+                return Ok(new { message = "User registered successfully", userId = userId });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Registration failed. The email may already be registered in the system." });
+            }
         }
 
         [HttpPost("login")]
