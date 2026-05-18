@@ -1,4 +1,4 @@
-﻿using System.Numerics;
+using System.Numerics;
 
 namespace backend.Model
 {
@@ -7,6 +7,7 @@ namespace backend.Model
         public int PartId { get; set; }
 
         public string PartName { get; set; }
+        public string Category { get; set; }
         public string Description { get; set; }
 
         public decimal Price { get; set; }
