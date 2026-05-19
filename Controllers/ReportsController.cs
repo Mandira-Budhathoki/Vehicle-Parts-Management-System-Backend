@@ -1,4 +1,4 @@
-﻿using backend.Dto;
+using backend.Dto;
 using backend.Services;
 using backend.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -57,6 +57,33 @@ namespace backend.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "Failed to fetch pending credits report.", detail = ex.Message });
+            }
+        }
+
+        [HttpGet("financial")]
+        public async Task<ActionResult<FinancialReportDto>> GetFinancialReport([FromQuery] string period = "monthly", [FromQuery] string? date = null)
+        {
+            try
+            {
+                DateTime refDate = DateTime.UtcNow;
+                if (!string.IsNullOrEmpty(date))
+                {
+                    if (date.Length == 4 && int.TryParse(date, out int year))
+                    {
+                        refDate = new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                    }
+                    else if (DateTime.TryParse(date, out DateTime parsedDate))
+                    {
+                        refDate = parsedDate;
+                    }
+                }
+                
+                var result = await _reportsService.GetFinancialReportAsync(period, refDate);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to fetch financial report.", detail = ex.Message });
             }
         }
     }
