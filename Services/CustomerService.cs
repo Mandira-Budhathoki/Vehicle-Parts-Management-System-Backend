@@ -29,6 +29,18 @@ namespace backend.Services
 
             _context.Users.Add(user);
             _context.SaveChanges();
+
+            // Notify the user to change their default password
+            var notification = new Notification
+            {
+                UserId = user.UserId,
+                Message = "Welcome! For your security, please update your default password.",
+                Type = "PASSWORD_RESET_REQUIRED",
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.Notifications.Add(notification);
+            _context.SaveChanges();
             
             return user.UserId;
         }

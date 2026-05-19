@@ -31,6 +31,7 @@ builder.Services.AddScoped<IReportsService, ReportsService>();
 builder.Services.AddScoped<IPurchaseInvoiceService, PurchaseInvoiceService>();
 builder.Services.AddScoped<IPartsService, PartsService>();
 builder.Services.AddScoped<ISalesService, SalesService>();
+builder.Services.AddHostedService<AutomatedTaskService>();
 
 // ================= CORS =================
 builder.Services.AddCors(options =>

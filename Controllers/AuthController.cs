@@ -1,6 +1,7 @@
 using backend.Dto;
 using backend.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace backend.Controllers
 {
@@ -42,6 +43,24 @@ namespace backend.Controllers
                     detail = ex.Message
                 });
             }
+        }
+
+        [Authorize]
+        [HttpPut("change-password")]
+        public IActionResult ChangePassword([FromBody] ChangePasswordDto dto, [FromServices] backend.Data.AppDbContext dbContext)
+        {
+            var idClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(idClaim, out int userId))
+                return Unauthorized();
+
+            var user = dbContext.Users.Find(userId);
+            if (user == null || user.Password != dto.CurrentPassword)
+                return BadRequest(new { message = "Invalid current password." });
+
+            user.Password = dto.NewPassword;
+            dbContext.SaveChanges();
+
+            return Ok(new { message = "Password updated successfully." });
         }
     }
 }
