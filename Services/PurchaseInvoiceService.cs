@@ -75,6 +75,13 @@ namespace backend.Services
                 var vendor = await _context.Vendors.FindAsync(dto.VendorId);
                 if (vendor == null) throw new Exception("Vendor not found.");
 
+                // Dynamically resolve active user to prevent foreign key errors (e.g. if User 1 doesn't exist)
+                var activeUser = await _context.Users.FirstOrDefaultAsync();
+                if (activeUser != null)
+                {
+                    adminUserId = activeUser.UserId;
+                }
+
                 // Calculate total amount and prepare items
                 decimal totalAmount = 0;
                 var purchaseItems = new List<PurchaseItem>();
