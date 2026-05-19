@@ -51,44 +51,40 @@ namespace backend.Services
 
         private async Task CheckLowStockAsync(AppDbContext dbContext)
         {
-            var lowStockParts = await dbContext.Parts
-                .Where(p => p.StockQuantity < 10)
-                .ToListAsync();
-
-            if (!lowStockParts.Any()) return;
+            var parts = await dbContext.Parts.ToListAsync();
 
             var admins = await dbContext.Users
                 .Where(u => u.Role == "ADMIN")
                 .ToListAsync();
 
-            if (!admins.Any()) return;
-
-            var thresholdTime = DateTime.UtcNow.AddDays(-1);
-
-            foreach (var part in lowStockParts)
+            foreach (var part in parts)
             {
-                var message = $"Low stock alert: {part.PartName} (Stock: {part.StockQuantity})";
+                var isLow = part.StockQuantity < 10;
 
-                foreach (var admin in admins)
+                // Only trigger when status CHANGES to LOW
+                if (isLow && part.StockStatus != "LOW")
                 {
-                    var recentNotif = await dbContext.Notifications
-                        .AnyAsync(n => n.UserId == admin.UserId 
-                                    && n.Type == "ALERT" 
-                                    && n.Message == message 
-                                    && n.CreatedAt > thresholdTime);
+                    var message = $"Low stock alert: {part.PartName} (Stock: {part.StockQuantity})";
 
-                    if (!recentNotif)
+                    foreach (var admin in admins)
                     {
-                        var notification = new Notification
+                        dbContext.Notifications.Add(new Notification
                         {
                             UserId = admin.UserId,
                             Message = message,
                             Type = "ALERT",
                             IsRead = false,
                             CreatedAt = DateTime.UtcNow
-                        };
-                        dbContext.Notifications.Add(notification);
+                        });
                     }
+
+                    part.StockStatus = "LOW";
+                }
+
+                // Reset when stock becomes healthy again
+                if (!isLow && part.StockStatus == "LOW")
+                {
+                    part.StockStatus = "NORMAL";
                 }
             }
 

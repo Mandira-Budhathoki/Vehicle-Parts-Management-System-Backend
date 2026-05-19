@@ -21,5 +21,6 @@ namespace backend.Model
 
         public List<SalesItem> SalesItems { get; set; }
         public List<PurchaseItem> PurchaseItems { get; set; }
+        public string StockStatus { get; set; } = "NORMAL";
     }
 }
