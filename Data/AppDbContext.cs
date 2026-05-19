@@ -26,8 +26,6 @@ namespace backend.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // The initial migration created these tables without plural names
-            // Map them so EF doesn't look for "Appointments", "Reviews", etc.
             modelBuilder.Entity<Appointment>().ToTable("Appointment");
             modelBuilder.Entity<Review>().ToTable("Review");
             modelBuilder.Entity<Notification>().ToTable("Notification");
