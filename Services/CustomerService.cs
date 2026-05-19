@@ -127,6 +127,92 @@ namespace backend.Services
                 .ToListAsync();
         }
 
+        public async Task<CustomerFullProfileDto?> GetFullCustomerProfileAsync(int id)
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.UserId == id && u.Role == "CUSTOMER");
+
+            if (user == null) return null;
+
+            var vehicles = await _context.Vehicles
+                .Where(v => v.UserId == id)
+                .Select(v => new VehicleDto
+                {
+                    VehicleId = v.VehicleId,
+                    VehicleNumber = v.VehicleNumber,
+                    Brand = v.Brand,
+                    Model = v.Model,
+                    Year = v.Year
+                })
+                .ToListAsync();
+
+            var sales = await _context.Sales
+                .Include(s => s.SalesItems)
+                    .ThenInclude(si => si.Part)
+                .Where(s => s.UserId == id)
+                .OrderByDescending(s => s.Date)
+                .Select(s => new SalesHistoryDto
+                {
+                    SalesId = s.SalesId,
+                    Date = s.Date,
+                    TotalAmount = s.TotalAmount,
+                    Discount = s.Discount,
+                    FinalAmount = s.FinalAmount,
+                    PaymentStatus = s.PaymentStatus,
+                    Items = s.SalesItems.Select(si => new SalesItemHistoryDto
+                    {
+                        PartName = si.Part != null ? si.Part.PartName : "Unknown Part",
+                        Quantity = si.Quantity,
+                        Price = si.Price,
+                        Subtotal = si.Subtotal
+                    }).ToList()
+                })
+                .ToListAsync();
+
+            var appointments = await _context.Appointments
+                .Include(a => a.Vehicle)
+                .Where(a => a.Vehicle.UserId == id)
+                .OrderByDescending(a => a.Date)
+                .Select(a => new AppointmentDto
+                {
+                    AppointmentId = a.AppointmentId,
+                    VehicleId = a.VehicleId,
+                    VehicleNumber = a.Vehicle.VehicleNumber,
+                    Brand = a.Vehicle.Brand,
+                    Model = a.Vehicle.Model,
+                    Date = a.Date,
+                    Status = a.Status,
+                    ServiceType = a.ServiceType,
+                    Notes = a.Notes
+                })
+                .ToListAsync();
+
+            var requests = await _context.PartRequests
+                .Where(r => r.UserId == id)
+                .OrderByDescending(r => r.RequestDate)
+                .Select(r => new PartRequestDto
+                {
+                    RequestId = r.RequestId,
+                    PartName = r.PartName,
+                    Notes = r.Part != null ? r.Part.Description : null,
+                    Status = r.Status,
+                    RequestDate = r.RequestDate
+                })
+                .ToListAsync();
+
+            return new CustomerFullProfileDto
+            {
+                UserId = user.UserId,
+                Name = user.Name,
+                Email = user.Email,
+                Phone = user.Phone,
+                Vehicles = vehicles,
+                SalesHistory = sales,
+                Appointments = appointments,
+                PartRequests = requests
+            };
+        }
+
         public void DeleteCustomer(int id)
         {
             var user = _context.Users.Find(id);

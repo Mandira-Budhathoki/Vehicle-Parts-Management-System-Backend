@@ -10,6 +10,7 @@ namespace backend.Interfaces
         IEnumerable<UserDto> GetAllCustomers();
         void UpdateProfile(int id, RegisterUserDto dto);
         Task<IEnumerable<CustomerResponseDto>> GetAllCustomersAsync();
+        Task<CustomerFullProfileDto?> GetFullCustomerProfileAsync(int id);
         void DeleteCustomer(int id);
     }
 }
