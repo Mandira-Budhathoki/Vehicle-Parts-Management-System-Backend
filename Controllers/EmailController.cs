@@ -23,11 +23,7 @@ namespace backend.Controllers
             _config = config;
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        // POST: api/email/send-invoice
-        // Feature 11: Staff sends a completed sales invoice to a customer's email.
-        // Requires a real SalesId (created by POST /api/sales in Feature 7).
-        // ─────────────────────────────────────────────────────────────────────
+        
         [HttpPost("send-invoice")]
         public async Task<IActionResult> SendInvoice([FromBody] SendInvoiceEmailDto dto)
         {
@@ -129,10 +125,7 @@ namespace backend.Controllers
             }
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        // Private helper: sends via Gmail SMTP (TLS port 587)
-        // Credentials come from appsettings.json  →  "Smtp" section
-        // ─────────────────────────────────────────────────────────────────────
+        
         private async Task SendEmailAsync(string toEmail, string subject, string htmlBody)
         {
             var smtp = _config.GetSection("Smtp");

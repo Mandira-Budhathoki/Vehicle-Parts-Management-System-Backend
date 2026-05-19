@@ -19,14 +19,39 @@ namespace backend.Controllers
         }
 
         // GET: api/sales-history/user/{userId}
-        // Returns all purchase/sales records for a customer 
+
         [HttpGet("user/{userId}")]
-        public async Task<IActionResult> GetByUser(int userId)
+        public async Task<IActionResult> GetByUser(
+            int userId,
+            [FromQuery] DateTime? from,
+            [FromQuery] DateTime? to,
+            [FromQuery] string? search)
         {
-            var sales = await _context.Sales
+            var query = _context.Sales
                 .Include(s => s.SalesItems)
                     .ThenInclude(si => si.Part)
                 .Where(s => s.UserId == userId)
+                .AsQueryable();
+
+            // Date range filters
+            if (from.HasValue)
+                query = query.Where(s => s.Date >= from.Value.ToUniversalTime());
+
+            if (to.HasValue)
+                // include the full "to" day
+                query = query.Where(s => s.Date <= to.Value.ToUniversalTime().AddDays(1).AddTicks(-1));
+
+            // Part name search: keep the sale if ANY item matches
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var lower = search.ToLower();
+                query = query.Where(s =>
+                    s.SalesItems.Any(si =>
+                        si.Part != null &&
+                        si.Part.PartName.ToLower().Contains(lower)));
+            }
+
+            var sales = await query
                 .OrderByDescending(s => s.Date)
                 .Select(s => new SalesHistoryDto
                 {
